@@ -41,13 +41,31 @@ void DrawCircle(SDL_Renderer * renderer, int centreX, int centreY, int radius)
    }
 }
 
-void render_level_1(SDL_Renderer* renderer, Attractor* a, Bullet* b){
-    a->x = 200;
-    a->y = 200;
-    a->mass = 10;
-    a->radius = 50;
+void render_level_1(SDL_Renderer* renderer, float aim, Bullet* bullet, Uint32 mode){
+    Attractor a;
+    a.x = 200;
+    a.y = 200;
+    a.mass = 10;
+    a.radius = 50;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    DrawCircle(renderer, a->x, a->y, a->radius);
+    DrawCircle(renderer, a.x, a.y, a.radius);
+    SDL_RenderPresent(renderer);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    DrawCircle(renderer, bullet->x, bullet->y, 10);
+    SDL_RenderPresent(renderer);
+    
+
+}
+
+void render_level_2(SDL_Renderer* renderer, float aim, Bullet* bullet, Uint32 mode){
+    Attractor a;
+    a.x = 400;
+    a.y = 200;
+    a.mass = 10;
+    a.radius = 50;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    DrawCircle(renderer, a.x, a.y, a.radius);
     SDL_RenderPresent(renderer);
 }
 

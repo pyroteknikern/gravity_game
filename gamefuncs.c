@@ -20,15 +20,23 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     bool run = true;
     int fps = 60;
     SDL_Event event;
-    void (*page_renderer)(SDL_Renderer*);
+    Uint32 level = 0;
+    float aim = 0.;
+    void (*page_renderer)(SDL_Renderer*, float, Bullet*, Uint32);
+    Bullet bullet;
+    bullet.x=10;
+    bullet.y=10;   
     page_renderer = &render_level_1;   
+    Uint32 mode = 0; //0 for aim, 1 for animate
     while(run){
         while(SDL_PollEvent(&event)){
             if(event.type == SDL_QUIT){
                 run = false;
             }
         }
-    page_renderer(renderer);
+    (*page_renderer)(renderer, aim, &bullet, mode);
+    
+    
     SDL_Delay(1000/fps);
     }
 }   

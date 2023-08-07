@@ -11,6 +11,9 @@ typedef struct{
 typedef struct{
     double x;
     double y;
+
+    double vel_x;
+    double vel_y;
 } Bullet;
 
 #endif

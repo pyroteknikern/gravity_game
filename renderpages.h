@@ -12,7 +12,8 @@ typedef struct{
     char* text;
 } Button;
 
-void render_level_1(SDL_Renderer*, Attractor*, Bullet*);
+void render_level_1(SDL_Renderer*, float, Bullet*, Uint32);
+void render_level_2(SDL_Renderer*, float, Bullet*, Uint32);
 
 void render_menu(SDL_Renderer*);
 void render_map_selector(SDL_Renderer*);
