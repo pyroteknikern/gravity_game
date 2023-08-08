@@ -45,6 +45,31 @@ void DrawCircle(SDL_Renderer * renderer, int centreX, int centreY, int radius)
 }
 
 
+void game_aim(Bullet* bullet, float direction){
+    float vel = 1;
+    bullet->vel_x = cos(direction) * vel;
+    bullet->vel_y = sin(direction) * vel;    
+}
+void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* mode){   
+    while(SDL_PollEvent(event)){
+        if(event->type == SDL_QUIT){
+            *run = false;
+        }
+	if(event->type == SDL_KEYDOWN){
+	    if(event->key.keysym.sym == SDLK_r){
+	        *direction += 0.1;
+	    }
+	    if(event->key.keysym.sym == SDLK_l){
+	        *direction -= 0.1;
+            }
+	    if(event->key.keysym.sym == SDLK_f){
+                *mode = 1;
+            }	   
+	}
+    }
+}
+
+		
 void game_draw_objects(SDL_Renderer* renderer, Layout* layout, unsigned int number_of_attractors, float aim){
     for(int i = 0; i < number_of_attractors; i++){
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -55,6 +80,9 @@ void game_draw_objects(SDL_Renderer* renderer, Layout* layout, unsigned int numb
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     DrawCircle(renderer, layout->blt->x, layout->blt->y, 5);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    DrawCircle(renderer, layout->blt->x+ 10*cos(aim), layout->blt->y+10*sin(aim), 1);
 }
 
 
@@ -62,10 +90,10 @@ void game_animate(Layout* layout, unsigned int number_of_attractors){
     double ax = 0;
     double ay = 0;
     double a = 0;
-    for(int i = 0; i < sizeof(layout->atrs)/sizeof(Attractor); i++){
-	double dist_squared = pow(layout->atrs[i].x, 2) + pow(layout->atrs[i].y, 2);
+    for(int i = 0; i < number_of_attractors; i++){
+	double dist_squared = pow(layout->atrs[i].x-layout->blt->x, 2) + pow(layout->atrs[i].y-layout->blt->y, 2);
         double ang = atan2(layout->atrs[i].y - layout->blt->y, layout->atrs[i].x - layout->blt->x);
-	a = 0.1*layout->atrs[i].radius / dist_squared;
+	a = 2*layout->atrs[i].radius / dist_squared;
 	ax += a * cos(ang);
 	ay += a * sin(ang);	
     }
@@ -92,9 +120,8 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     bool run = true;
     int fps = 60;
     SDL_Event event;
-    float aim = 0.;
     unsigned int mode = 0;
-    
+    float direction = 0.; 
      
     Bullet bullet;
     bullet.x = 9.;
@@ -108,25 +135,34 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     attractor.mass = 10;
     attractor.radius = 30;
 
+    Attractor att2;
+    att2.x = 400;
+    att2.y = 200;
+    att2.mass = 10;
+    att2.radius = 20;
+
     Target target;
     target.x = 300;
     target.y = 300;
 
     Layout layout;
     layout.atrs[0] = attractor;
+    layout.atrs[1] = att2;
     layout.blt = &bullet;
     layout.trgt = target;
-    unsigned int number_of_attractors = 1;
+    unsigned int number_of_attractors = 2;
 
     while(run){
-        while(SDL_PollEvent(&event)){
-            if(event.type == SDL_QUIT){
-                run = false;
-            }
-        }
-    SDL_RenderClear(renderer); 
-    game_animate(&layout, number_of_attractors);
-    game_draw_objects(renderer, &layout, number_of_attractors, aim); 
+    handle_events(&event, &run, &direction, &mode);
+    SDL_RenderClear(renderer);
+    switch(mode){
+        case 0:
+	    game_aim(layout.blt, direction);
+	    break; 
+	case 1:
+            game_animate(&layout, number_of_attractors);
+    }
+    game_draw_objects(renderer, &layout, number_of_attractors, direction); 
     SDL_SetRenderDrawColor(renderer, 0,0,0,255);
     SDL_RenderPresent(renderer);
     SDL_Delay(1000/fps);
