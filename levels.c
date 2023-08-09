@@ -1,33 +1,33 @@
 #include"gameobj.h"
 #include"levels.h"
+
 void level_1(Layout* l){
-    Bullet bullet;
-    bullet.x = 9.;
-    bullet.y = 9.;
-    bullet.vel_x = 0.;
-    bullet.vel_y = 0.; 
-    bullet.radius = 10;
 
-    Attractor attractor;
-    attractor.x = 100;
-    attractor.y = 100;
-    attractor.mass = 10;
-    attractor.radius = 30;
+    l->blt->x = 9.;
+    l->blt->y = 9.;
+    l->blt->vel_x = 0.;
+    l->blt->vel_y = 0.; 
+    l->blt->radius = 10;
 
-    Attractor att2;
-    att2.x = 400;
-    att2.y = 200;
-    att2.mass = 10;
-    att2.radius = 20;
+    Attractor a1;
+    a1.x = 100;
+    a1.y = 100;
+    a1.mass = 10;
+    a1.radius = 30;
+
+    Attractor a2;
+    a2.x = 400;
+    a2.y = 200;
+    a2.mass = 10;
+    a2.radius = 20;
 
     Target target;
     target.x = 360;
     target.y = 300;
     target.radius = 20;
     
-    l->blt = &bullet;
     l->trgt = target;
-    l->atrs[0] = attractor;
-    l->atrs[1] = att2;
+    l->atrs[0] = a1;
+    l->atrs[1] = a2;
     l->number_of_attractors = 2;
 }

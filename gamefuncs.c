@@ -5,55 +5,16 @@
 #include<stdbool.h>
 #include<math.h>
 #include"levels.h"
-void DrawCircle(SDL_Renderer * renderer, int centreX, int centreY, int radius)
-{
-   const int diameter = (radius * 2);
-
-   int x = (radius - 1);
-   int y = 0;
-   int tx = 1;
-   int ty = 1;
-   int error = (tx - diameter);
-
-   while (x >= y)
-   {
-      //  Each of the following renders an octant of the circle
-      SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
-      SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
-      SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
-      SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
-      SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
-      SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
-      SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
-      SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);
-
-      if (error <= 0)
-      {
-         ++y;
-         error += ty;
-         ty += 2;
-      }
-
-      if (error > 0)
-      {
-         --x;
-         tx += 2;
-         error += (tx - diameter);
-      }
-   }
-}
+#include"shapes.h"
 
 
 void game_aim(Bullet* bullet, float direction){
     float vel = 1;
-    printf("%f\n", bullet->x);
-    fflush(stdout);
     bullet->vel_x = cos(direction) * vel;
     bullet->vel_y = sin(direction) * vel; 
-
-    printf("%f\n", bullet->x);
-    fflush(stdout);
 }
+
+
 void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* mode){   
     while(SDL_PollEvent(event)){
         if(event->type == SDL_QUIT){
@@ -69,7 +30,7 @@ void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* 
 	    if(event->key.keysym.sym == SDLK_f){
                 *mode = 1;
             }	   
-	}
+    	}
     }
 }
 
@@ -108,6 +69,7 @@ void game_animate(Layout* layout){
     layout->blt->y += layout->blt->vel_y;
 }
 	
+
 void game_init(SDL_Renderer** renderer, SDL_Window** window){
     *window = SDL_CreateWindow("gravity game",
         SDL_WINDOWPOS_UNDEFINED,
@@ -121,8 +83,9 @@ void game_init(SDL_Renderer** renderer, SDL_Window** window){
 }
 
 
-
 void game_check_collisions(Layout* layout){}
+
+
 void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     bool run = true;
     int fps = 60;
@@ -131,21 +94,21 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     float direction = 0.; 
     unsigned int level = 0;
     Layout layout;
+    Bullet bullet;
+    layout.blt = &bullet;
+
     level_1(&layout);
-    printf("%i\n", layout.trgt.x);
-    fflush(stdout);
+
     while(run){
     handle_events(&event, &run, &direction, &mode);
     SDL_RenderClear(renderer);
     switch(mode){
         case 0:
-	    printf("%f\n", layout.blt->x);
-	    fflush(stdout);
 	    game_aim(layout.blt, direction);
 	    break; 
 	case 1:
-            game_animate(&layout);
-            game_check_collisions(&layout); 
+        game_animate(&layout);
+        game_check_collisions(&layout); 
     }
     game_draw_objects(renderer, &layout, direction); 
     SDL_SetRenderDrawColor(renderer, 0,0,0,255);
@@ -153,6 +116,7 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     SDL_Delay(1000/fps);
     }
 }   
+
 
 void game_destroy(SDL_Renderer* renderer, SDL_Window* window){
     SDL_DestroyWindow(window);
