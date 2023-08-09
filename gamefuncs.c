@@ -4,8 +4,7 @@
 #include<stdio.h>
 #include<stdbool.h>
 #include<math.h>
-
-
+#include"levels.h"
 void DrawCircle(SDL_Renderer * renderer, int centreX, int centreY, int radius)
 {
    const int diameter = (radius * 2);
@@ -47,8 +46,13 @@ void DrawCircle(SDL_Renderer * renderer, int centreX, int centreY, int radius)
 
 void game_aim(Bullet* bullet, float direction){
     float vel = 1;
+    printf("%f\n", bullet->x);
+    fflush(stdout);
     bullet->vel_x = cos(direction) * vel;
-    bullet->vel_y = sin(direction) * vel;    
+    bullet->vel_y = sin(direction) * vel; 
+
+    printf("%f\n", bullet->x);
+    fflush(stdout);
 }
 void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* mode){   
     while(SDL_PollEvent(event)){
@@ -70,27 +74,27 @@ void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* 
 }
 
 		
-void game_draw_objects(SDL_Renderer* renderer, Layout* layout, unsigned int number_of_attractors, float aim){
-    for(int i = 0; i < number_of_attractors; i++){
+void game_draw_objects(SDL_Renderer* renderer, Layout* layout, float aim){
+    for(int i = 0; i < layout->number_of_attractors; i++){
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         DrawCircle(renderer, layout->atrs[i].x, layout->atrs[i].y, layout->atrs[i].radius);
     }
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    DrawCircle(renderer, layout->trgt.x, layout->trgt.y, 10);
+    DrawCircle(renderer, layout->trgt.x, layout->trgt.y, layout->trgt.radius);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    DrawCircle(renderer, layout->blt->x, layout->blt->y, 5);
+    DrawCircle(renderer, layout->blt->x, layout->blt->y, layout->blt->radius);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     DrawCircle(renderer, layout->blt->x+ 10*cos(aim), layout->blt->y+10*sin(aim), 1);
 }
 
 
-void game_animate(Layout* layout, unsigned int number_of_attractors){
+void game_animate(Layout* layout){
     double ax = 0;
     double ay = 0;
     double a = 0;
-    for(int i = 0; i < number_of_attractors; i++){
+    for(int i = 0; i < layout->number_of_attractors; i++){
 	double dist_squared = pow(layout->atrs[i].x-layout->blt->x, 2) + pow(layout->atrs[i].y-layout->blt->y, 2);
         double ang = atan2(layout->atrs[i].y - layout->blt->y, layout->atrs[i].x - layout->blt->x);
 	a = 2*layout->atrs[i].radius / dist_squared;
@@ -116,53 +120,34 @@ void game_init(SDL_Renderer** renderer, SDL_Window** window){
         );
 }
 
+
+
+void game_check_collisions(Layout* layout){}
 void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     bool run = true;
     int fps = 60;
     SDL_Event event;
     unsigned int mode = 0;
     float direction = 0.; 
-     
-    Bullet bullet;
-    bullet.x = 9.;
-    bullet.y = 9.;
-    bullet.vel_x = 0.;
-    bullet.vel_y = 0.; 
-    
-    Attractor attractor;
-    attractor.x = 100;
-    attractor.y = 100;
-    attractor.mass = 10;
-    attractor.radius = 30;
-
-    Attractor att2;
-    att2.x = 400;
-    att2.y = 200;
-    att2.mass = 10;
-    att2.radius = 20;
-
-    Target target;
-    target.x = 300;
-    target.y = 300;
-
+    unsigned int level = 0;
     Layout layout;
-    layout.atrs[0] = attractor;
-    layout.atrs[1] = att2;
-    layout.blt = &bullet;
-    layout.trgt = target;
-    unsigned int number_of_attractors = 2;
-
+    level_1(&layout);
+    printf("%i\n", layout.trgt.x);
+    fflush(stdout);
     while(run){
     handle_events(&event, &run, &direction, &mode);
     SDL_RenderClear(renderer);
     switch(mode){
         case 0:
+	    printf("%f\n", layout.blt->x);
+	    fflush(stdout);
 	    game_aim(layout.blt, direction);
 	    break; 
 	case 1:
-            game_animate(&layout, number_of_attractors);
+            game_animate(&layout);
+            game_check_collisions(&layout); 
     }
-    game_draw_objects(renderer, &layout, number_of_attractors, direction); 
+    game_draw_objects(renderer, &layout, direction); 
     SDL_SetRenderDrawColor(renderer, 0,0,0,255);
     SDL_RenderPresent(renderer);
     SDL_Delay(1000/fps);

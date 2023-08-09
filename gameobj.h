@@ -11,6 +11,8 @@ typedef struct{
 
 
 typedef struct{
+    unsigned int radius;
+
     double x;
     double y;
 
@@ -20,6 +22,7 @@ typedef struct{
 
 
 typedef struct{
+    unsigned int radius;
     unsigned int x;
     unsigned int y;
 } Target;
@@ -27,7 +30,8 @@ typedef struct{
 
 typedef struct{
     Bullet* blt;
-    Target trgt;    
+    Target trgt;
+    unsigned int number_of_attractors;    
     Attractor atrs[10];
 } Layout;
 
