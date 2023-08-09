@@ -7,6 +7,16 @@
 #include"levels.h"
 #include"shapes.h"
 
+void game_level_change(Layout* layout, unsigned int level){
+    switch(level){
+        case 0:
+	    level_1(layout);
+	    break;
+        case 1:
+            level_2(layout);
+	    break;
+    }	    
+}
 
 void game_aim(Bullet* bullet, float direction){
     float vel = 1;
@@ -15,7 +25,7 @@ void game_aim(Bullet* bullet, float direction){
 }
 
 
-void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* mode){   
+void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* mode, Layout* layout, int level){   
     while(SDL_PollEvent(event)){
         if(event->type == SDL_QUIT){
             *run = false;
@@ -29,6 +39,10 @@ void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* 
             }
 	    if(event->key.keysym.sym == SDLK_f){
                 *mode = 1;
+	    }
+	    if(event->key.keysym.sym == SDLK_q){
+		*mode = 0;
+		game_level_change(layout, level);
             }	   
     	}
     }
@@ -83,7 +97,25 @@ void game_init(SDL_Renderer** renderer, SDL_Window** window){
 }
 
 
-void game_check_collisions(Layout* layout){}
+void game_check_collisions(Layout* layout, unsigned int* level, unsigned int* mode){
+    bool col = false;
+    for(int i = 0; i < layout->number_of_attractors; i++){
+	double dist = sqrt(pow(layout->atrs[i].x - layout->blt->x, 2) + pow(layout->atrs[i].y - layout->blt->y, 2));
+        if(dist < layout->atrs[i].radius+layout->blt->radius){
+	    *mode = 0;
+	    col = true;
+        }
+    }
+    	
+    double dist = sqrt(pow(layout->trgt.x - layout->blt->x, 2) + pow(layout->trgt.y - layout->blt->y, 2));
+    if(dist < layout->trgt.radius+layout->blt->radius){
+	*level += 1;
+	*mode = 0;
+	col = true;
+    }  
+    if(!col){return;}
+    game_level_change(layout, *level);
+}
 
 
 void game_loop(SDL_Renderer* renderer, SDL_Window* window){
@@ -93,22 +125,23 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     unsigned int mode = 0;
     float direction = 0.; 
     unsigned int level = 0;
+    
     Layout layout;
     Bullet bullet;
     layout.blt = &bullet;
-
+    
     level_1(&layout);
 
     while(run){
-    handle_events(&event, &run, &direction, &mode);
+    handle_events(&event, &run, &direction, &mode, &layout, level);
     SDL_RenderClear(renderer);
     switch(mode){
         case 0:
 	    game_aim(layout.blt, direction);
 	    break; 
 	case 1:
-        game_animate(&layout);
-        game_check_collisions(&layout); 
+	    game_animate(&layout);
+            game_check_collisions(&layout, &level, &mode); 
     }
     game_draw_objects(renderer, &layout, direction); 
     SDL_SetRenderDrawColor(renderer, 0,0,0,255);
