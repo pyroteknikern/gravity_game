@@ -1,19 +1,22 @@
 #include<SDL2/SDL.h>
 #include"gamefuncs.h"
-#include"renderpages.h"
 #include<stdio.h>
 #include<stdbool.h>
 #include<math.h>
 #include"levels.h"
 #include"shapes.h"
 
-void game_level_change(Layout* layout, unsigned int level){
+
+void game_level_change(Layout* layout, unsigned int level, bool* run){
     switch(level){
         case 0:
 	    level_1(layout);
 	    break;
         case 1:
             level_2(layout);
+	    break;
+	default:
+	    *run = false;
 	    break;
     }	    
 }
@@ -42,7 +45,7 @@ void handle_events(SDL_Event* event, bool* run, float* direction, unsigned int* 
 	    }
 	    if(event->key.keysym.sym == SDLK_q){
 		*mode = 0;
-		game_level_change(layout, level);
+		game_level_change(layout, level, run);
             }	   
     	}
     }
@@ -97,7 +100,7 @@ void game_init(SDL_Renderer** renderer, SDL_Window** window){
 }
 
 
-void game_check_collisions(Layout* layout, unsigned int* level, unsigned int* mode){
+void game_check_collisions(Layout* layout, unsigned int* level, unsigned int* mode, bool* run_ptr){
     bool col = false;
     for(int i = 0; i < layout->number_of_attractors; i++){
 	double dist = sqrt(pow(layout->atrs[i].x - layout->blt->x, 2) + pow(layout->atrs[i].y - layout->blt->y, 2));
@@ -114,7 +117,7 @@ void game_check_collisions(Layout* layout, unsigned int* level, unsigned int* mo
 	col = true;
     }  
     if(!col){return;}
-    game_level_change(layout, *level);
+    game_level_change(layout, *level, run_ptr);
 }
 
 
@@ -141,7 +144,7 @@ void game_loop(SDL_Renderer* renderer, SDL_Window* window){
 	    break; 
 	case 1:
 	    game_animate(&layout);
-            game_check_collisions(&layout, &level, &mode); 
+            game_check_collisions(&layout, &level, &mode, &run); 
     }
     game_draw_objects(renderer, &layout, direction); 
     SDL_SetRenderDrawColor(renderer, 0,0,0,255);
