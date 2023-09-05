@@ -15,6 +15,15 @@ void game_level_change(Layout* layout, unsigned int level, bool* run){
         case 1:
             level_2(layout);
 	    break;
+	case 2:
+	    level_3(layout);
+	    break;
+	case 3:
+	    level_4(layout);
+	    break;
+	case 4:
+	    level_5(layout);
+	    break;
 	default:
 	    *run = false;
 	    break;
@@ -64,34 +73,35 @@ void game_draw_objects(SDL_Renderer* renderer, Layout* layout, float aim){
     DrawCircle(renderer, layout->blt->x, layout->blt->y, layout->blt->radius);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    DrawCircle(renderer, layout->blt->x+ 10*cos(aim), layout->blt->y+10*sin(aim), 1);
+    DrawCircle(renderer, layout->blt->x+ 20*cos(aim), layout->blt->y+20*sin(aim), 1);
 }
 
 
 void game_animate(Layout* layout){
-    double ax = 0;
-    double ay = 0;
-    double a = 0;
-    for(int i = 0; i < layout->number_of_attractors; i++){
-	double dist_squared = pow(layout->atrs[i].x-layout->blt->x, 2) + pow(layout->atrs[i].y-layout->blt->y, 2);
-        double ang = atan2(layout->atrs[i].y - layout->blt->y, layout->atrs[i].x - layout->blt->x);
-	a = 2*layout->atrs[i].radius / dist_squared;
-	ax += a * cos(ang);
-	ay += a * sin(ang);	
-    }
+    for(int i = 0; i < 3; i++){
+        double ax = 0;
+        double ay = 0;
+        double a = 0;
+        for(int j = 0; j < layout->number_of_attractors; j++){
+	    double dist_squared = pow(layout->atrs[j].x-layout->blt->x, 2) + pow(layout->atrs[j].y-layout->blt->y, 2);
+            double ang = atan2(layout->atrs[j].y - layout->blt->y, layout->atrs[j].x - layout->blt->x);
+	    a = 2*layout->atrs[j].radius / dist_squared;
+	    ax += a * cos(ang);
+	    ay += a * sin(ang);	
+    	}
 
-    layout->blt->vel_x += ax;
-    layout->blt->vel_y += ay;
-    layout->blt->x += layout->blt->vel_x;
-    layout->blt->y += layout->blt->vel_y;
+    	layout->blt->vel_x += ax;
+    	layout->blt->vel_y += ay;
+    	layout->blt->x += layout->blt->vel_x;
+    	layout->blt->y += layout->blt->vel_y;
+	}
 }
-	
 
 void game_init(SDL_Renderer** renderer, SDL_Window** window){
     *window = SDL_CreateWindow("gravity game",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        640, 480,
+        1200, 900,
         SDL_WINDOW_SHOWN
         );
     *renderer = SDL_CreateRenderer(*window,
@@ -123,7 +133,7 @@ void game_check_collisions(Layout* layout, unsigned int* level, unsigned int* mo
 
 void game_loop(SDL_Renderer* renderer, SDL_Window* window){
     bool run = true;
-    int fps = 60;
+    const int fps = 60;
     SDL_Event event;
     unsigned int mode = 0;
     float direction = 0.; 
